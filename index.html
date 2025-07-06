@@ -1,0 +1,89 @@
+
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="UTF-8">
+  <title>GAME SPOT ielūgums</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #fff;
+      text-align: center;
+      font-family: 'Arial', sans-serif;
+      padding: 20px;
+    }
+    #card {
+      position: relative;
+      width: 768px;
+      height: 1074px;
+      margin: 0 auto 20px;
+      background-image: url('template.png');
+      background-size: cover;
+      background-position: center;
+    }
+    .editable-text {
+      position: absolute;
+      color: #00ccff;
+      font-size: 24px;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px #000;
+      width: 90%;
+      left: 5%;
+      text-align: center;
+    }
+    #nameText { top: 680px; }
+    #levelText { top: 720px; }
+    #arrivalText { top: 760px; }
+    input {
+      padding: 10px;
+      margin: 8px;
+      font-size: 16px;
+      width: 300px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+      background-color: #0ff;
+      border: none;
+      border-radius: 5px;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+  <h1>Izveido savu dzimšanas dienas ielūgumu</h1>
+  <div id="card">
+    <div id="nameText" class="editable-text"></div>
+    <div id="levelText" class="editable-text"></div>
+    <div id="arrivalText" class="editable-text"></div>
+  </div>
+  <div>
+    <input type="text" id="nameInput" placeholder="Jubilāra vārds (piem. Emīls)" />
+    <input type="number" id="levelInput" placeholder="Vecums (piem. 10)" />
+    <input type="text" id="arrivalInput" placeholder="Ierašanās datums un laiks (piem. 20. jūlijs plkst. 15:00)" />
+  </div>
+  <button onclick="updateCard()">Atjaunināt ielūgumu</button>
+  <button onclick="downloadCard()">Lejupielādēt kā attēlu</button>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script>
+    function updateCard() {
+      const name = document.getElementById('nameInput').value;
+      const level = document.getElementById('levelInput').value;
+      const arrival = document.getElementById('arrivalInput').value;
+      document.getElementById('nameText').textContent = `${name} aicina uz ballīti!`;
+      document.getElementById('levelText').textContent = `${name} ir sasniedzis ${level}. līmeni!`;
+      document.getElementById('arrivalText').textContent = `Ierašanās: ${arrival}`;
+    }
+    function downloadCard() {
+      html2canvas(document.getElementById('card')).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'gamespot_ielugums.png';
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+    }
+  </script>
+</body>
+</html>
