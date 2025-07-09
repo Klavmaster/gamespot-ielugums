@@ -35,7 +35,7 @@
       }
     }
     #nameText {
-      top: 65%;
+      top: calc(65% + 5cm);
       left: 5%;
       text-align: left;
       width: 30%;
@@ -47,7 +47,7 @@
       width: 30%;
     }
     #arrivalText {
-      top: 65%;
+      top: calc(65% + 5cm);
       right: 5%;
       text-align: right;
       width: 30%;
@@ -112,7 +112,7 @@
       const date = document.getElementById('dateInput').value;
       const time = document.getElementById('timeInput').value;
 
-     document.getElementById('levelText').textContent = `ESMU SASNIEDZIS  ${level} LĪMENI `;
+     document.getElementById('levelText').textContent = `ESMU SASNIEDZIS/GUSI  ${level} LĪMENI `;
        document.getElementById('nameText').textContent = `${name} UZAICINA  UZ SAVU VR BALLĪTI!`;
       document.getElementById('arrivalText').textContent = `${date} | ${time}`;
     }
