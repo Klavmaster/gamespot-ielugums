@@ -52,7 +52,7 @@
       text-align: right;
       width: 30%;
     }
-    input {
+    input, select {
       padding: 10px;
       margin: 8px;
       font-size: 16px;
@@ -92,35 +92,41 @@
       <option value="#ffffff">Neona balta</option>
       <option value="#ff3333">Neona sarkana</option>
     </select>
+    <label for="genderSelect">Dzimums:</label>
+    <select id="genderSelect">
+      <option value="v">Puika</option>
+      <option value="s">Meitene</option>
+    </select>
   </div>
+
   <button onclick="updateCard()">Atjaunināt ielūgumu</button>
   <button onclick="downloadCard()">Lejupielādēt kā attēlu</button>
   <p>Lejupielādes skaits: <span id="downloadCounter">0</span></p>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">$1
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       let count = parseInt(localStorage.getItem('downloadCount') || '0');
       document.getElementById('downloadCounter').textContent = count;
     });
-  </script>
-  <script>
+
     function changeTextColor() {
       const color = document.getElementById('colorSelect').value;
       document.getElementById('nameText').style.color = color;
       document.getElementById('levelText').style.color = color;
       document.getElementById('arrivalText').style.color = color;
     }
-  </script>
-  <script>
+
     function updateCard() {
       const name = document.getElementById('nameInput').value;
       const level = document.getElementById('levelInput').value;
       const date = document.getElementById('dateInput').value;
       const time = document.getElementById('timeInput').value;
+      const gender = document.getElementById('genderSelect').value;
+      const suffix = gender === 's' ? 'SASNIEGUSI' : 'SASNIEDZIS';
 
-     document.getElementById('levelText').textContent = `ESMU SASNIEDZIS/GUSI  ${level} LĪMENI `;
-       document.getElementById('nameText').textContent = `${name} UZAICINA  UZ SAVU VR BALLĪTI!`;
+      document.getElementById('levelText').textContent = `ESMU ${suffix}  ${level} LĪMENI`;
+      document.getElementById('nameText').textContent = `${name} UZAICINA  UZ SAVU VR BALLĪTI!`;
       document.getElementById('arrivalText').textContent = `${date} | ${time}`;
     }
 
@@ -135,7 +141,6 @@
         let count = parseInt(localStorage.getItem('downloadCount') || '0') + 1;
         localStorage.setItem('downloadCount', count);
         document.getElementById('downloadCounter').textContent = count;
-      });
       });
     }
   </script>
