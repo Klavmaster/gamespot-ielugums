@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GAME SPOT ielūgums</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
   <style>
     body {
       background-color: #000;
@@ -107,9 +109,43 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script>
+    const firebaseConfig = {
+
+  apiKey: "AIzaSyD1PDjSgOXSGDHww5uaUPfCBAGF7DGniRM",
+
+  authDomain: "gamespot-lejuplades.firebaseapp.com",
+
+  databaseURL: "https://gamespot-lejuplades-default-rtdb.firebaseio.com",
+
+  projectId: "gamespot-lejuplades",
+
+  storageBucket: "gamespot-lejuplades.firebasestorage.app",
+
+  messagingSenderId: "978470649429",
+
+  appId: "1:978470649429:web:e5ae8f76da69f16d865edc",
+
+  measurementId: "G-MHJJNH6TE1"
+
+};
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function updateDownloadCounterUI() {
+      db.ref('downloads').on('value', (snapshot) => {
+        const count = snapshot.val() || 0;
+        document.getElementById('downloadCounter').textContent = count;
+      });
+    }
+
+    function incrementDownloadCounter() {
+      const ref = db.ref('downloads');
+      ref.transaction(current => (current || 0) + 1);
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
-      let count = parseInt(localStorage.getItem('downloadCount') || '0');
-      document.getElementById('downloadCounter').textContent = count;
+      updateDownloadCounterUI();
     });
 
     function changeTextColor() {
@@ -134,17 +170,14 @@
 
     function downloadCard() {
       html2canvas(document.getElementById('card'), {
-        scale: window.devicePixelRatio * 2, // augstāka izšķirtspēja
+        scale: window.devicePixelRatio * 2,
         useCORS: true
       }).then(canvas => {
         const link = document.createElement('a');
         link.download = 'gamespot_ielugums.png';
         link.href = canvas.toDataURL('image/png');
         link.click();
-
-        let count = parseInt(localStorage.getItem('downloadCount') || '0') + 1;
-        localStorage.setItem('downloadCount', count);
-        document.getElementById('downloadCounter').textContent = count;
+        incrementDownloadCounter();
       });
     }
   </script>
