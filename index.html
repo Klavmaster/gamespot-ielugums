@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GAME SPOT ielūgums</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #fff;
+      text-align: center;
+      font-family: 'Arial', sans-serif;
+      padding: 20px;
+    }
+    #card {
+      position: relative;
+      width: 100%;
+      max-width: 768px;
+      aspect-ratio: 768 / 1074;
+      margin: 0 auto 20px;
+      background-image: url('https://klavmaster.github.io/gamespot-ielugums/template.png');
+      background-size: cover;
+      background-position: center;
+    }
+    .editable-text {
+      position: absolute;
+      color: #00ccff;
+      font-size: 3.2vw;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px #000;
+    }
+    @media (min-width: 768px) {
+      .editable-text {
+        font-size: 24px;
+      }
+    }
+    #nameText {
+      top: calc(65% + 5cm);
+      left: 5%;
+      text-align: left;
+      width: 30%;
+    }
+    #levelText {
+      top: 65%;
+      left: 35%;
+      text-align: center;
+      width: 30%;
+    }
+    #arrivalText {
+      top: calc(65% + 5cm);
+      right: 5%;
+      text-align: right;
+      width: 30%;
+    }
+    input {
+      padding: 10px;
+      margin: 8px;
+      font-size: 16px;
+      width: 90%;
+      max-width: 300px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+      background-color: #0ff;
+      border: none;
+      border-radius: 5px;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+  <h1>Izveido savu dzimšanas dienas ielūgumu</h1>
+  <div id="card">
+    <div id="nameText" class="editable-text"></div>
+    <div id="levelText" class="editable-text"></div>
+    <div id="arrivalText" class="editable-text"></div>
+  </div>
+
+  <div>
+    <input type="text" id="nameInput" placeholder="Jubilāra vārds (piem. Emīls)" />
+    <input type="number" id="levelInput" placeholder="Vecums (piem. 10)" />
+    <input type="text" id="dateInput" placeholder="Ierašanās datums (piem. 20. jūlijs)" />
+    <input type="text" id="timeInput" placeholder="Ierašanās laiks (piem. plkst. 15:00)" />
+    <label for="colorSelect">Izvēlies teksta krāsu:</label>
+    <select id="colorSelect" onchange="changeTextColor()">
+      <option value="#ff00ff">Neona rozā</option>
+      <option value="#00ccff" selected>Neona zila</option>
+      <option value="#00ff00">Neona zaļa</option>
+      <option value="#ffffff">Neona balta</option>
+      <option value="#ff3333">Neona sarkana</option>
+    </select>
+  </div>
+  <button onclick="updateCard()">Atjaunināt ielūgumu</button>
+  <button onclick="downloadCard()">Lejupielādēt kā attēlu</button>
+  <p>Lejupielādes skaits: <span id="downloadCounter">0</span></p>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">$1
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      let count = parseInt(localStorage.getItem('downloadCount') || '0');
+      document.getElementById('downloadCounter').textContent = count;
+    });
+  </script>
+  <script>
+    function changeTextColor() {
+      const color = document.getElementById('colorSelect').value;
+      document.getElementById('nameText').style.color = color;
+      document.getElementById('levelText').style.color = color;
+      document.getElementById('arrivalText').style.color = color;
+    }
+  </script>
+  <script>
+    function updateCard() {
+      const name = document.getElementById('nameInput').value;
+      const level = document.getElementById('levelInput').value;
+      const date = document.getElementById('dateInput').value;
+      const time = document.getElementById('timeInput').value;
+
+     document.getElementById('levelText').textContent = `ESMU SASNIEDZIS/GUSI  ${level} LĪMENI `;
+       document.getElementById('nameText').textContent = `${name} UZAICINA  UZ SAVU VR BALLĪTI!`;
+      document.getElementById('arrivalText').textContent = `${date} | ${time}`;
+    }
+
+    function downloadCard() {
+      html2canvas(document.getElementById('card'), { scale: 3 }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'gamespot_ielugums.png';
+        link.href = canvas.toDataURL();
+        link.click();
+
+        // Atjauno lejupielāžu skaitītāju
+        let count = parseInt(localStorage.getItem('downloadCount') || '0') + 1;
+        localStorage.setItem('downloadCount', count);
+        document.getElementById('downloadCounter').textContent = count;
+      });
+      });
+    }
+  </script>
+</body>
+</html>
