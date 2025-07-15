@@ -37,19 +37,19 @@
       }
     }
     #nameText {
-      top: calc(65% + 5cm);
+      top: 60%;
       left: 5%;
       text-align: left;
       width: 30%;
     }
     #levelText {
-      top: 65%;
+      top: 35%;
       left: 35%;
       text-align: center;
       width: 30%;
     }
     #arrivalText {
-      top: calc(65% + 5cm);
+      top: 60%;
       right: 5%;
       text-align: right;
       width: 30%;
@@ -110,24 +110,15 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script>
     const firebaseConfig = {
-
-  apiKey: "AIzaSyD1PDjSgOXSGDHww5uaUPfCBAGF7DGniRM",
-
-  authDomain: "gamespot-lejuplades.firebaseapp.com",
-
-  databaseURL: "https://gamespot-lejuplades-default-rtdb.firebaseio.com",
-
-  projectId: "gamespot-lejuplades",
-
-  storageBucket: "gamespot-lejuplades.firebasestorage.app",
-
-  messagingSenderId: "978470649429",
-
-  appId: "1:978470649429:web:e5ae8f76da69f16d865edc",
-
-  measurementId: "G-MHJJNH6TE1"
-
-};
+      apiKey: "AIzaSyD1PDjSgOXSGDHww5uaUPfCBAGF7DGniRM",
+      authDomain: "gamespot-lejuplades.firebaseapp.com",
+      databaseURL: "https://gamespot-lejuplades-default-rtdb.firebaseio.com",
+      projectId: "gamespot-lejuplades",
+      storageBucket: "gamespot-lejuplades.firebasestorage.app",
+      messagingSenderId: "978470649429",
+      appId: "1:978470649429:web:e5ae8f76da69f16d865edc",
+      measurementId: "G-MHJJNH6TE1"
+    };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
@@ -170,14 +161,16 @@
 
     function downloadCard() {
       html2canvas(document.getElementById('card'), {
-        scale: window.devicePixelRatio * 2,
+        scale: 6, // augstāka kvalitāte
         useCORS: true
       }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = 'gamespot_ielugums.png';
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        incrementDownloadCounter();
+        canvas.toBlob(function(blob) {
+          const link = document.createElement('a');
+          link.download = 'gamespot_ielugums.png';
+          link.href = URL.createObjectURL(blob);
+          link.click();
+          incrementDownloadCounter();
+        }, 'image/png', 1.0); // maksimāla kvalitāte
       });
     }
   </script>
