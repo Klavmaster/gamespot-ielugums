@@ -1,151 +1,203 @@
 <!DOCTYPE html>
 <html lang="lv">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>GAME SPOT ielūgums</title>
+
+  <!-- Firebase (Compat v9) -->
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+
+  <!-- html2canvas attēla ģenerēšanai -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNa5l0x5yFQWJm7gq6iYw8uNn2JQfYd+4k0c8QGm2d0ax6B4aI1Jt0l6N5Zb8JQmK/3Qj1h7r0wCk8QG4mJf8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
   <style>
-    body {
-      background-color: #000;
-      color: #fff;
-      text-align: center;
-      font-family: 'Arial', sans-serif;
-      padding: 20px;
+    :root {
+      --neon: #00ccff;
     }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #000;
+      color: #fff;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      line-height: 1.45;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: clamp(20px, 4vw, 28px);
+    }
+
+    /* Kartīte ar fona attēlu */
     #card {
       position: relative;
       width: 100%;
       max-width: 768px;
-      aspect-ratio: 768 / 1074;
       margin: 0 auto 20px;
       background-image: url('https://klavmaster.github.io/gamespot-ielugums/template.png');
       background-size: cover;
       background-position: center;
+      aspect-ratio: 768 / 1074; /* moderns veids */
+      border-radius: 8px;
+      overflow: hidden;
     }
-    .editable-text {
-      position: absolute;
-      color: #00ccff;
-      font-size: 3.5vw;
-      font-weight: bold;
-      text-shadow: 2px 2px 4px #000;
-    }
-    @media (min-width: 768px) {
-      .editable-text {
-        font-size: 24px;
+    /* Fallback, ja nav aspect-ratio atbalsta */
+    @supports not (aspect-ratio: 1 / 1) {
+      #card {
+        height: 0;
+        padding-top: calc(1074 / 768 * 100%); /* 139.84% */
       }
     }
-    #nameText {
-  bottom: 3cm;
-  left: 5%;
-  text-align: left;
-  width: 30%;
-}
-    #levelText {
-  bottom: 7cm;
-  left: 35%;
-  text-align: center;
-  width: 30%;
-}
-    #arrivalText {
-  bottom: 3cm;
-  right: 5%;
-  text-align: right;
-  width: 30%;
-}
+
+    .editable-text {
+      position: absolute;
+      color: var(--neon);
+      /* Dinamisks fonta izmērs, lai darbojas gan telefonā, gan desktopā */
+      font-size: clamp(14px, 2.8vw, 26px);
+      font-weight: 800;
+      text-shadow: 2px 2px 4px #000;
+      letter-spacing: 0.5px;
+    }
+
+    /* Noklusējuma pozīcijas (telefonam) — procenti pret kartītes augstumu/platumu */
+    #nameText   { bottom: 7%; left: 5%;  width: 45%; text-align: left; }
+    #levelText  { bottom: 40%; left: 35%; width: 30%; text-align: center; }
+    #arrivalText{ bottom: 7%; right: 5%; width: 45%; text-align: right; }
+
+    /* Lielākiem ekrāniem nedaudz precīzākas pozīcijas */
+    @media (min-width: 768px) {
+      .editable-text { font-size: clamp(18px, 1.9vw, 28px); }
+      #nameText   { bottom: 6%; left: 6%;  width: 40%; }
+      #levelText  { bottom: 36%; left: 35%; width: 30%; }
+      #arrivalText{ bottom: 6%; right: 6%; width: 40%; }
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+      gap: 10px;
+      justify-items: center;
+      margin: 0 auto;
+      max-width: 780px;
+    }
+    @media (min-width: 640px) {
+      .controls {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
     input, select {
+      width: 100%;
+      max-width: 360px;
       padding: 12px;
-      margin: 10px;
-      font-size: 18px;
-      width: 95%;
-      max-width: 350px;
-      border-radius: 6px;
-      border: 1px solid #555;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #444;
+      background: #0b0b0b;
+      color: #fff;
+      outline: none;
+    }
+    input::placeholder { color: #9aa0a6; }
+
+    .buttons {
+      margin-top: 10px;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
     }
     button {
-      padding: 12px 24px;
-      font-size: 18px;
-      margin-top: 15px;
+      padding: 12px 20px;
+      font-size: 16px;
       cursor: pointer;
-      background-color: #0ff;
-      border: none;
-      border-radius: 6px;
+      background: #0ff;
       color: #000;
+      border: 0;
+      border-radius: 8px;
+      font-weight: 700;
     }
-  @media (max-width: 767px) {
-  #nameText {
-    bottom: -7cm;
-    left: 5%;
-    text-align: left;
-    width: 30%;
-  }
-  #levelText {
-    bottom: -3cm;
-    left: 35%;
-    text-align: center;
-    width: 30%;
-  }
-  #arrivalText {
-    bottom: -7cm;
-    right: 5%;
-    text-align: right;
-    width: 30%;
-  }
-}
-  #levelText {
-    bottom: -3cm;
-    left: 35%;
-    text-align: center;
-    width: 30%;
-  }
-  #arrivalText {
-    bottom: -7cm;
-    right: 5%;
-    text-align: right;
-    width: 30%;
-  }
-}
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
 
-  
-  
-}
-</style>
+    p.counter {
+      margin-top: 8px;
+      color: #bdbdbd;
+    }
+    .note {
+      max-width: 780px;
+      margin: 10px auto 0;
+      color: #9aa0a6;
+      font-size: 14px;
+    }
+    .sr-only {
+      position: absolute !important;
+      height: 1px; width: 1px;
+      overflow: hidden;
+      clip: rect(1px, 1px, 1px, 1px);
+      white-space: nowrap;
+    }
+  </style>
 </head>
 <body>
   <h1>Izveido savu dzimšanas dienas ielūgumu</h1>
-  <div id="card">
+
+  <div id="card" aria-label="Ielūguma priekšskatījums">
     <div id="nameText" class="editable-text"></div>
     <div id="levelText" class="editable-text"></div>
     <div id="arrivalText" class="editable-text"></div>
   </div>
 
-  <div>
-    <input type="text" id="nameInput" placeholder="Jubilāra vārds (piem. Emīls)" />
-    <input type="number" id="levelInput" placeholder="Vecums (piem. 10)" />
-    <input type="text" id="dateInput" placeholder="Ierašanās datums (piem. 20. jūlijs)" />
-    <input type="text" id="timeInput" placeholder="Ierašanās laiks (piem. plkst. 15:00)" />
-    <label for="colorSelect">Izvēlies teksta krāsu:</label>
-    <select id="colorSelect" onchange="changeTextColor()">
-      <option value="#ff00ff">Neona rozā</option>
-      <option value="#00ccff" selected>Neona zila</option>
-      <option value="#00ff00">Neona zaļa</option>
-      <option value="#ffffff">Neona balta</option>
-      <option value="#ff3333">Neona sarkana</option>
-    </select>
-    <label for="genderSelect">Dzimums:</label>
-    <select id="genderSelect">
-      <option value="v">Puika</option>
-      <option value="s">Meitene</option>
-    </select>
+  <form class="controls" id="inviteForm" onsubmit="event.preventDefault(); updateCard();">
+    <label class="sr-only" for="nameInput">Jubilāra vārds</label>
+    <input type="text" id="nameInput" placeholder="Jubilāra vārds (piem. Emīls)" required />
+
+    <label class="sr-only" for="levelInput">Vecums</label>
+    <input type="number" id="levelInput" placeholder="Vecums (piem. 10)" inputmode="numeric" min="1" max="120" required />
+
+    <label class="sr-only" for="dateInput">Ierašanās datums</label>
+    <input type="text" id="dateInput" placeholder="Ierašanās datums (piem. 20. jūlijs)" required />
+
+    <label class="sr-only" for="timeInput">Ierašanās laiks</label>
+    <input type="text" id="timeInput" placeholder="Ierašanās laiks (piem. plkst. 15:00)" required />
+
+    <div>
+      <label for="colorSelect">Izvēlies teksta krāsu:</label><br/>
+      <select id="colorSelect">
+        <option value="#ff00ff">Neona rozā</option>
+        <option value="#00ccff" selected>Neona zila</option>
+        <option value="#00ff00">Neona zaļa</option>
+        <option value="#ffffff">Balta</option>
+        <option value="#ff3333">Neona sarkana</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="genderSelect">Dzimums:</label><br/>
+      <select id="genderSelect">
+        <option value="v">Puika</option>
+        <option value="s">Meitene</option>
+      </select>
+    </div>
+  </form>
+
+  <div class="buttons">
+    <button id="updateBtn" type="button" onclick="updateCard()">Atjaunināt ielūgumu</button>
+    <button id="downloadBtn" type="button" onclick="downloadCard()">Lejupielādēt kā attēlu</button>
   </div>
 
-  <button onclick="updateCard()">Atjaunināt ielūgumu</button>
-  <button onclick="downloadCard()">Lejupielādēt kā attēlu</button>
-  <p>Lejupielādes skaits: <span id="downloadCounter">0</span></p>
+  <p class="counter">Lejupielādes skaits: <span id="downloadCounter">0</span></p>
+  <p class="note">Piezīme: lai aizsargātu datu bāzi, Firebase noteikumos izmanto <code>auth != null</code> un ieslēdz Anonymous Auth.</p>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script>
+    'use strict';
+
+    // -------------------------------
+    // Firebase konfigurācija
+    // -------------------------------
     const firebaseConfig = {
       apiKey: "AIzaSyD1PDjSgOXSGDHww5uaUPfCBAGF7DGniRM",
       authDomain: "gamespot-lejuplades.firebaseapp.com",
@@ -160,6 +212,23 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // Anonymous Auth (ja drošības noteikumi prasa auth rakstīšanai)
+    function ensureAuth() {
+      return firebase.auth().signInAnonymously().catch((error) => {
+        console.warn('Auth error:', error);
+      });
+    }
+
+    // -------------------------------
+    // UI palīgfunkcijas
+    // -------------------------------
+    function setTextColor(color) {
+      document.documentElement.style.setProperty('--neon', color);
+      document.getElementById('nameText').style.color = color;
+      document.getElementById('levelText').style.color = color;
+      document.getElementById('arrivalText').style.color = color;
+    }
+
     function updateDownloadCounterUI() {
       db.ref('downloads').on('value', (snapshot) => {
         const count = snapshot.val() || 0;
@@ -172,44 +241,81 @@
       ref.transaction(current => (current || 0) + 1);
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-      updateDownloadCounterUI();
-    });
-
-    function changeTextColor() {
-      const color = document.getElementById('colorSelect').value;
-      document.getElementById('nameText').style.color = color;
-      document.getElementById('levelText').style.color = color;
-      document.getElementById('arrivalText').style.color = color;
-    }
-
+    // -------------------------------
+    // Galvenās darbības
+    // -------------------------------
     function updateCard() {
-      const name = document.getElementById('nameInput').value;
-      const level = document.getElementById('levelInput').value;
-      const date = document.getElementById('dateInput').value;
-      const time = document.getElementById('timeInput').value;
-      const gender = document.getElementById('genderSelect').value;
-      const suffix = gender === 's' ? 'SASNIEGUSI' : 'SASNIEDZIS';
+      const nameEl  = document.getElementById('nameInput');
+      const levelEl = document.getElementById('levelInput');
+      const dateEl  = document.getElementById('dateInput');
+      const timeEl  = document.getElementById('timeInput');
+      const genderEl= document.getElementById('genderSelect');
 
+      const name  = (nameEl.value || '').trim();
+      const level = parseInt(levelEl.value, 10);
+      const date  = (dateEl.value || '').trim();
+      const time  = (timeEl.value || '').trim();
+
+      if (!name || !Number.isFinite(level) || level < 1 || !date || !time) {
+        alert('Lūdzu, aizpildi visus laukus korekti (vecums ≥ 1).');
+        return;
+      }
+
+      const suffix = (genderEl.value === 's') ? 'SASNIEGUSI' : 'SASNIEDZIS';
       document.getElementById('levelText').textContent = `ESMU ${suffix} ${level} LĪMENI`;
-      document.getElementById('nameText').textContent = `${name} UZAICINA UZ SAVU VR BALLĪTI!`;
+      document.getElementById('nameText').textContent  = `${name} UZAICINA UZ SAVU VR BALLĪTI!`;
       document.getElementById('arrivalText').textContent = `${date} | ${time}`;
     }
 
-    function downloadCard() {
-      html2canvas(document.getElementById('card'), {
-        scale: 6, // augstāka kvalitāte
-        useCORS: true
-      }).then(canvas => {
-        canvas.toBlob(function(blob) {
+    async function downloadCard() {
+      const dlBtn = document.getElementById('downloadBtn');
+      dlBtn.disabled = true;
+      dlBtn.textContent = 'Ģenerēju…';
+
+      try {
+        // Pārliecināmies, ka ir atjaunināts saturs
+        updateCard();
+
+        const node = document.getElementById('card');
+        const canvas = await html2canvas(node, {
+          scale: Math.min(6, Math.max(2, Math.floor(window.devicePixelRatio * 2))), // kvalitatīvs, bet ne pārmērīgs
+          useCORS: true,
+          allowTaint: false,
+          backgroundColor: null
+        });
+
+        // Lejupielādējam kā PNG
+        canvas.toBlob(function (blob) {
           const link = document.createElement('a');
           link.download = 'gamespot_ielugums.png';
           link.href = URL.createObjectURL(blob);
           link.click();
+          URL.revokeObjectURL(link.href);
           incrementDownloadCounter();
-        }, 'image/png', 1.0); // maksimāla kvalitāte
-      });
+        }, 'image/png', 1.0);
+
+      } catch (err) {
+        console.error(err);
+        alert('Radās kļūda, ģenerējot attēlu.');
+      } finally {
+        dlBtn.disabled = false;
+        dlBtn.textContent = 'Lejupielādēt kā attēlu';
+      }
     }
+
+    // -------------------------------
+    // Inicializācija
+    // -------------------------------
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Pirmreizēji uzliekam izvēlēto krāsu
+      const colorSelect = document.getElementById('colorSelect');
+      setTextColor(colorSelect.value);
+      colorSelect.addEventListener('change', () => setTextColor(colorSelect.value));
+
+      // Ielogošanās anonīmi (ja vajag), tad atjauninām skaitītāju
+      await ensureAuth();
+      updateDownloadCounterUI();
+    });
   </script>
 </body>
 </html>
